@@ -1,5 +1,5 @@
 #定义变量
-TARGET = led_testCopy
+TARGET = led_test
 CROSS_COMPILE ?= arm-linux-gnueabihf-
 
 CC := $(CROSS_COMPILE)gcc
