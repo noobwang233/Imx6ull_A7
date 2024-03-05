@@ -1,5 +1,5 @@
 #定义变量
-TARGET = main
+TARGET = led_testCopy
 CROSS_COMPILE ?= arm-linux-gnueabihf-
 
 CC := $(CROSS_COMPILE)gcc
@@ -28,7 +28,7 @@ INC_PATH = $(wildcard $(INC_DIR)) #所有的头文件目录
 INCLUDE = $(patsubst %, -I %, $(INC_PATH))
 
 #最终目标文件
-$(BUILD_DIR)/$(TARGET).bin: $(OBJS)
+$(BUILD_DIR)/$(TARGET).bin: $(OBJS) $(BUILD_DIR)/$(TARGET).o
 #链接所有的目标文件
 	$(LD) -Timx6ull.lds -o $(BUILD_DIR)/$(TARGET).elf $^
 #生成最终目标文件
@@ -45,6 +45,9 @@ $(BUILD_DIR)/%.o : $(SRC_DIR)/%.s
 	@mkdir -p $(BUILD_DIR)
 	bear -- $(CC) -Wall -nostdlib -c -O2 $(INCLUDE) -o $@ $<
 $(BUILD_DIR)/%.o : $(SRC_DIR)/%.c
+	@mkdir -p $(BUILD_DIR)
+	bear -- $(CC) -Wall -nostdlib -c -O2 $(INCLUDE) -o $@ $<
+$(BUILD_DIR)/%.o : prog/%.c
 	@mkdir -p $(BUILD_DIR)
 	bear -- $(CC) -Wall -nostdlib -c -O2 $(INCLUDE) -o $@ $<
 
