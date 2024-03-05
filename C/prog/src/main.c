@@ -10,10 +10,10 @@ int main()
 
     for(;;)
     {
-        // ledSwitch(LED_OFF);
-        // delay(500);
+        ledSwitch(LED_OFF);
+        delay(500);
         ledSwitch(LED_ON);
-        // delay(500);
+        delay(500);
     }
     return 0;
 }

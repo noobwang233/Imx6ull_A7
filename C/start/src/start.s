@@ -1,9 +1,18 @@
 .global _start /* 全局标号 */
-_start: 
-    /* 进入SVC模式 */
-    mrs r0, cpsr
-    bic r0, r0, #0x1f /* 将r0的低5位清零，也就是cpsr的M0~M4 */
-    orr r0, r0, #0x13 /* r0或上0x13,表示使用SVC模式 */
-    msr cpsr, r0 /* 将r0 的数据写入到cpsr_c中 */
-    ldr sp, =0X80200000 /* 设置栈指针 */
-    b main /* 跳转到main函数 */
+_start:		/*定义一个全局标号_start */
+
+	/* 进入SVC模式（超级管理员模式） */
+	mrs r0, cpsr
+	bic r0, r0, #0x1f 	/* 将r0寄存器中的低5位清零，也就是cpsr的M0~M4 	*/
+	orr r0, r0, #0x13 	/* r0或上0x13,表示使用SVC模式					*/
+	msr cpsr, r0		/* 将r0 的数据写入到cpsr_c中 					*/
+
+	/* 设置栈指针，
+	 * 注意：IMX6UL的堆栈是向下增长的！
+	 * 堆栈指针地址一定要是4字节地址对齐的！！！
+	 * DDR范围:0X80000000~0X9FFFFFFF（512M)或者0X80000000~0X8FFFFFFF（256M)
+	 * 0x80200000-0x80000000=0x200000=2MB，由于堆栈向下增长，固一共2MB字节
+	 */
+
+	ldr sp,=0X80200000	/* 设置用户模式下的栈首地址为0X80200000,大小为2MB	  	  */
+	b main				/* 跳转到main函数 										*/
