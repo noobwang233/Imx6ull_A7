@@ -6,9 +6,9 @@
       "-c",
       "-O2",
       "-I",
-      "BSP/inc",
-      "Common/inc",
-      "imx6ul/inc",
+      "BSP/inc/",
+      "Common/inc/",
+      "imx6ul/inc/",
       "-o",
       "build/clk.o",
       "BSP/src/clk.c"

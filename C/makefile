@@ -15,24 +15,27 @@ SRC_DIR = **/src
 INC_DIR = **/inc
 
 #源文件
-CSRCS = $(wildcard $(SRC_DIR)/*.c)
-SSRCS = $(wildcard $(SRC_DIR)/*.s)
+CSRCS = $(wildcard $(SRC_DIR)/*.c) #所有的.c文件
+SSRCS = $(wildcard $(SRC_DIR)/*.s) #所有的.s文件
 #目标文件（*.o）
-SOBJS = $(patsubst %.s, $(BUILD_DIR)/%.o, $(notdir $(SSRCS)))
-COBJS = $(patsubst %.c, $(BUILD_DIR)/%.o, $(notdir $(CSRCS)))
-OBJS = $(COBJS) $(SOBJS)
+SOBJS = $(patsubst %.s, $(BUILD_DIR)/%.o, $(notdir $(SSRCS))) #获取.s文件的目标文件.o文件
+COBJS = $(patsubst %.c, $(BUILD_DIR)/%.o, $(notdir $(CSRCS))) #获取.c文件的目标文件.o文件
+OBJS = $(COBJS) $(SOBJS) #所有的目标文件
 #头文件
-DEPS = $(wildcard $(INC_DIR)/*.h)
+DEPS = $(wildcard $(INC_DIR)/*.h) #所有的头文件
 
 #指定头文件的路径
-INCLUDE = $(patsubst %, -I %, $(INC_DIR))
-# $(BUILD_DIR)/$(TARGET).bin:
-# 	@echo $(SOBJS) $(BUILD_DIR)/%.o $(SRC_DIR)/%.s
-#目标文件
+INCLUDE = $(patsubst %, -I %, $(INCS_PATH))
+
+#最终目标文件
 $(BUILD_DIR)/$(TARGET).bin: $(OBJS)
+#链接所有的目标文件
 	$(LD) -Timx6ull.lds -o $(BUILD_DIR)/$(TARGET).elf $^
+#生成最终目标文件
 	$(OBJCOPY) -O binary -S $(BUILD_DIR)/$(TARGET).elf $@
+#反汇编elf
 	$(OBJDUMP) -D -m arm $(BUILD_DIR)/$(TARGET).elf > $(BUILD_DIR)/$(TARGET).dis
+#生成.imx文件
 	mkimx $(BUILD_DIR)/$(TARGET).bin
 
 #*.o文件的生成规则
