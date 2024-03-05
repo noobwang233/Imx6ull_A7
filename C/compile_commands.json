@@ -6,15 +6,17 @@
       "-c",
       "-O2",
       "-I",
-      "BSP/inc/",
-      "Common/inc/",
-      "imx6ul/inc/",
+      "BSP/inc",
+      "-I",
+      "Common/inc",
+      "-I",
+      "imx6ul/inc",
       "-o",
-      "build/clk.o",
-      "BSP/src/clk.c"
+      "build/start.o",
+      "start/src/start.s"
     ],
     "directory": "/home/wta3wx/Linux/NO_OS/C",
-    "file": "/home/wta3wx/Linux/NO_OS/C/BSP/src/clk.c",
-    "output": "/home/wta3wx/Linux/NO_OS/C/build/clk.o"
+    "file": "/home/wta3wx/Linux/NO_OS/C/start/src/start.s",
+    "output": "/home/wta3wx/Linux/NO_OS/C/build/start.o"
   }
 ]

@@ -23,9 +23,9 @@ COBJS = $(patsubst %.c, $(BUILD_DIR)/%.o, $(notdir $(CSRCS))) #获取.c文件的
 OBJS = $(COBJS) $(SOBJS) #所有的目标文件
 #头文件
 DEPS = $(wildcard $(INC_DIR)/*.h) #所有的头文件
-
+INC_PATH = $(wildcard $(INC_DIR)) #所有的头文件目录
 #指定头文件的路径
-INCLUDE = $(patsubst %, -I %, $(INCS_PATH))
+INCLUDE = $(patsubst %, -I %, $(INC_PATH))
 
 #最终目标文件
 $(BUILD_DIR)/$(TARGET).bin: $(OBJS)
@@ -53,4 +53,4 @@ $(BUILD_DIR)/%.o : $(SRC_DIR)/%.c
 clean:
 	rm -rf $(TARGET).elf $(TARGET).dis $(TARGET).bin $(COBJS) $(SOBJS)
 copy:
-	cp $(BUILD_DIR)/%.imx ~/Linux/OSD_share
+	cp *.imx ~/Linux/OSD_share
