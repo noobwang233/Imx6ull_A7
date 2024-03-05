@@ -53,4 +53,5 @@ $(BUILD_DIR)/%.o : $(SRC_DIR)/%.c
 clean:
 	rm -rf $(TARGET).elf $(TARGET).dis $(TARGET).bin $(COBJS) $(SOBJS)
 copy:
-	cp *.imx ~/Linux/OSD_share
+	rm -rf ~/OSD_share/*.imx
+	cp *.imx ~/OSD_share
