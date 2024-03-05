@@ -4,6 +4,7 @@ led.bin:led.s
 	arm-linux-gnueabihf-ld -Ttext 0X87800000 led.o -o led.elf 
 	arm-linux-gnueabihf-objcopy -O binary -S -g led.elf led.bin 
 	arm-linux-gnueabihf-objdump -D led.elf > led.dis
+	mkimx led.bin
 copy:
 	cp *.imx /home/wta3wx/OSD_share
 clean:

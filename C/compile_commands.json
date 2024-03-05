@@ -1,0 +1,20 @@
+[
+  {
+    "arguments": [
+      "/home/wta3wx/Linux/Tools/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc",
+      "-Wall",
+      "-c",
+      "-O2",
+      "-I",
+      "BSP/inc",
+      "Common/inc",
+      "imx6ul/inc",
+      "-o",
+      "build/clk.o",
+      "BSP/src/clk.c"
+    ],
+    "directory": "/home/wta3wx/Linux/NO_OS/C",
+    "file": "/home/wta3wx/Linux/NO_OS/C/BSP/src/clk.c",
+    "output": "/home/wta3wx/Linux/NO_OS/C/build/clk.o"
+  }
+]
