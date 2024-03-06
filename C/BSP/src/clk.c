@@ -1,7 +1,7 @@
 #include "imx6ull.h"
 #include "clk.h"
 
-void clk_enable(void)
+void clkEnable(void)
 {
     CCM->CCGR0 = 0XFFFFFFFF;
     CCM->CCGR1 = 0XFFFFFFFF;
@@ -10,11 +10,4 @@ void clk_enable(void)
     CCM->CCGR4 = 0XFFFFFFFF;
     CCM->CCGR5 = 0XFFFFFFFF;
     CCM->CCGR6 = 0XFFFFFFFF;
-    // CCM_CCGR0 = 0XFFFFFFFF;
-    // CCM_CCGR1 = 0XFFFFFFFF;
-    // CCM_CCGR2 = 0XFFFFFFFF;
-    // CCM_CCGR3 = 0XFFFFFFFF;
-    // CCM_CCGR4 = 0XFFFFFFFF;
-    // CCM_CCGR5 = 0XFFFFFFFF;
-    // CCM_CCGR6 = 0XFFFFFFFF;
 }

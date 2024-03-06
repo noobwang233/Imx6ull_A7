@@ -12,11 +12,11 @@
       "-I",
       "imx6ul/inc",
       "-o",
-      "build/led_testCopy.o",
-      "prog/led_testCopy.c"
+      "build/key.o",
+      "BSP/src/key.c"
     ],
     "directory": "/home/wta3wx/Linux/NO_OS/C",
-    "file": "/home/wta3wx/Linux/NO_OS/C/prog/led_testCopy.c",
-    "output": "/home/wta3wx/Linux/NO_OS/C/build/led_testCopy.o"
+    "file": "/home/wta3wx/Linux/NO_OS/C/BSP/src/key.c",
+    "output": "/home/wta3wx/Linux/NO_OS/C/build/key.o"
   }
 ]

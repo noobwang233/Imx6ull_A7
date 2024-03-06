@@ -1,13 +1,13 @@
-#ifndef LED_H
-#define LED_H
+#ifndef KEY_H
+#define KEY_H
 
 #include "imx6ull.h"
 
-#define KEY_  1u
-#define LED_OFF 0u
+#define KEY_VALUE  1u
+#define KEY_RELEASE 0u
 
 
-void ledInit(void);
-void ledSwitch(uint8_t sw);
+void keyInit(void);
+uint8_t keyRead(void);
 
 #endif
