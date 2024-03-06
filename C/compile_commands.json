@@ -12,11 +12,11 @@
       "-I",
       "imx6ul/inc",
       "-o",
-      "build/key.o",
-      "BSP/src/key.c"
+      "build/cmm.o",
+      "prog/cmm.c"
     ],
     "directory": "/home/wta3wx/Linux/NO_OS/C",
-    "file": "/home/wta3wx/Linux/NO_OS/C/BSP/src/key.c",
-    "output": "/home/wta3wx/Linux/NO_OS/C/build/key.o"
+    "file": "/home/wta3wx/Linux/NO_OS/C/prog/cmm.c",
+    "output": "/home/wta3wx/Linux/NO_OS/C/build/cmm.o"
   }
 ]

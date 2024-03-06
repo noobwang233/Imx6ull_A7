@@ -2,7 +2,6 @@
 #include "delay.h"
 #include "gpio.h"
 #include "imx6ull.h"
-#include <stdint.h>
 
 void keyInit(void)
 {
@@ -30,7 +29,7 @@ void keyInit(void)
 uint8_t keyRead()
 {
     uint8_t ret = KEY_RELEASE;
-    static unsigned char release = 1; /* 按键松开 */
+    static uint8_t release = 1u; /* 按键松开 */
 
     if((release == 1) && (gpioPinRead(GPIO1, 18u) == 0u))
     {
@@ -41,14 +40,18 @@ uint8_t keyRead()
             release = 0;
         }
     }
-    else if((gpioPinRead(GPIO1, 18u) != 0u))
+    else if((release == 0) && (gpioPinRead(GPIO1, 18u) != 0u))
     {
-        ret = KEY_RELEASE;
-        release = 1;
+        delay(10);
+        if(gpioPinRead(GPIO1, 18u) != 0)
+        {
+            ret = KEY_RELEASE;
+            release = 1;
+        }
     }
     else
     {
-        ret = KEY_VALUE;
+        ret = release;
     }
     return ret;
 }

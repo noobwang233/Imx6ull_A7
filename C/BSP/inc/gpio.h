@@ -2,7 +2,6 @@
 #define GPIO_H
 
 #include "imx6ull.h"
-#include <stdint.h>
 
 /* 枚举类型和结构体定义 */
 enum gpio_pin_direction
