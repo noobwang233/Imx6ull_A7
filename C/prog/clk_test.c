@@ -6,6 +6,7 @@
 int main()
 {
     clkEnable();
+    clkInit();
     ledInit();
 
     for(;;)
