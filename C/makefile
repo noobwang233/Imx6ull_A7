@@ -44,7 +44,7 @@ $(BUILD_DIR)/%.o : $(SRC_DIR)/%.s
 #命令前带“@”,表示不在终端上输出
 	@mkdir -p $(BUILD_DIR)
 	bear -- $(CC) -Wall -nostdlib -c -O2 $(INCLUDE) -o $@ $<
-$(BUILD_DIR)/%.o : $(SRC_DIR)/%.c
+$(BUILD_DIR)/%.o : $(SRC_DIR)/%.c $(INC_DIR)/*.h
 	@mkdir -p $(BUILD_DIR)
 	bear -- $(CC) -Wall -nostdlib -c -O2 $(INCLUDE) -o $@ $<
 $(BUILD_DIR)/%.o : prog/%.c

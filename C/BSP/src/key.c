@@ -3,6 +3,8 @@
 #include "gpio.h"
 #include "imx6ull.h"
 
+uint8_t state = KEY_RELEASE;
+
 void keyInit(void)
 {
     struct gpio_pin_config cfg;
@@ -28,30 +30,10 @@ void keyInit(void)
 
 uint8_t keyRead()
 {
-    uint8_t ret = KEY_RELEASE;
-    static uint8_t release = 1u; /* 按键松开 */
+    return state;
+}
 
-    if((release == 1) && (gpioPinRead(GPIO1, 18u) == 0u))
-    {
-        delay(10);
-        if(gpioPinRead(GPIO1, 18u) == 0)
-        {
-            ret = KEY_VALUE;
-            release = 0;
-        }
-    }
-    else if((release == 0) && (gpioPinRead(GPIO1, 18u) != 0u))
-    {
-        delay(10);
-        if(gpioPinRead(GPIO1, 18u) != 0)
-        {
-            ret = KEY_RELEASE;
-            release = 1;
-        }
-    }
-    else
-    {
-        ret = release;
-    }
-    return ret;
+void keyStateSet(uint8_t temp_state)
+{
+    state = temp_state;
 }

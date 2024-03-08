@@ -1,6 +1,6 @@
 */build/*
-**/*.idx
+**/**.idx
 **/*.imx
-C/compile_commands.json
-C/load.imx
-C/.cache/clangd/index/clk.h.C581602F21A4857E.idx
+*/compile_commands.json
+*/load.imx
+*/.cache/**

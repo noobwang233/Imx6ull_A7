@@ -9,5 +9,5 @@
 
 void keyInit(void);
 uint8_t keyRead(void);
-
+void keyStateSet(uint8_t temp_state);
 #endif

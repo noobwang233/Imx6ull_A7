@@ -12,11 +12,11 @@
       "-I",
       "imx6ul/inc",
       "-o",
-      "build/led_test.o",
-      "prog/led_test.c"
+      "build/start.o",
+      "start/src/start.s"
     ],
     "directory": "/home/wta3wx/Linux/NO_OS/C",
-    "file": "/home/wta3wx/Linux/NO_OS/C/prog/led_test.c",
-    "output": "/home/wta3wx/Linux/NO_OS/C/build/led_test.o"
+    "file": "/home/wta3wx/Linux/NO_OS/C/start/src/start.s",
+    "output": "/home/wta3wx/Linux/NO_OS/C/build/start.o"
   }
 ]
