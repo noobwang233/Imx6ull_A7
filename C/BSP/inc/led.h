@@ -3,8 +3,8 @@
 
 #include "imx6ull.h"
 
-#define LED_ON  0u
-#define LED_OFF 1u
+#define LED_ON  ON
+#define LED_OFF OFF
 
 
 void ledInit(void);

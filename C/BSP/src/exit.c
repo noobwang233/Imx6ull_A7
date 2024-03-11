@@ -4,6 +4,7 @@
 #include "led.h"
 #include "key.h"
 #include "int.h"
+#include "timer.h"
 
 void exit_init(void)
 {
@@ -32,12 +33,13 @@ void gpio1_io18_irqhandler(void)
 	 *定时器中断消抖法！！！
  	 */
 
-	delay(10);
-	if(gpioPinRead(GPIO1, 18) == 0)	/* 按键按下了  */
-	{
-		keyStateSet(!keyRead());
-		ledSwitch(keyRead());
-	}
+    filtertimer_restart(10);
+	// delay(10);
+	// if(gpioPinRead(GPIO1, 18) == 0)	/* 按键按下了  */
+	// {
+	// 	keyStateSet(!keyRead());
+	// 	ledSwitch(keyRead());
+	// }
 	
 	gpio_clearintflags(GPIO1, 18); /* 清除中断标志位 */
 }

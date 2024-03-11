@@ -3,8 +3,8 @@
 
 #include "imx6ull.h"
 
-#define KEY_VALUE  1u
-#define KEY_RELEASE 0u
+#define KEY_VALUE  ON
+#define KEY_RELEASE OFF
 
 
 void keyInit(void);

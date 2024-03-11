@@ -3,7 +3,7 @@
 #include "clk.h"
 #include "int.h"
 #include "exit.h"
-#include <stdint.h>
+
 int main()
 {
     // uint8_t ledState = LED_OFF;

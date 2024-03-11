@@ -1,5 +1,5 @@
 #定义变量
-TARGET = clk_test
+TARGET = timer_test
 CROSS_COMPILE ?= arm-linux-gnueabihf-
 
 CC := $(CROSS_COMPILE)gcc
