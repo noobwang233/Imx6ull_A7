@@ -14,8 +14,8 @@ SRC_DIR = **/src
 INC_DIR = **/inc
 
 #源文件
-CSRCS = $(wildcard $(SRC_DIR)/*.c) #所有的BSP文件夹里的.c文件
-SSRCS = $(wildcard *.s) #所有的.s文件
+CSRCS = $(wildcard $(SRC_DIR)/*.c) #所有的.c文件
+SSRCS = $(wildcard $(SRC_DIR)/*.s) #所有的.s文件
 
 #目标文件（*.o）
 SOBJS = $(patsubst %.s, $(BUILD_DIR)/%.o, $(notdir $(SSRCS))) #获取.s文件的目标文件.o文件
