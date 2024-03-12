@@ -14,17 +14,23 @@ SRC_DIR = **/src
 INC_DIR = **/inc
 
 #源文件
-CSRCS = $(wildcard $(SRC_DIR)/*.c) #所有的.c文件
-SSRCS = $(wildcard $(SRC_DIR)/*.s) #所有的.s文件
+CSRCS = $(wildcard $(SRC_DIR)/*.c) #所有的BSP文件夹里的.c文件
+SSRCS = $(wildcard *.s) #所有的.s文件
+
 #目标文件（*.o）
 SOBJS = $(patsubst %.s, $(BUILD_DIR)/%.o, $(notdir $(SSRCS))) #获取.s文件的目标文件.o文件
 COBJS = $(patsubst %.c, $(BUILD_DIR)/%.o, $(notdir $(CSRCS))) #获取.c文件的目标文件.o文件
 OBJS = $(COBJS) $(SOBJS) #所有的通用目标文件
+
 #头文件
 DEPS = $(wildcard $(INC_DIR)/*.h) #所有的头文件
 INC_PATH = $(wildcard $(INC_DIR)) #所有的头文件目录
 #指定头文件的路径
 INCLUDE = $(patsubst %, -I %, $(INC_PATH))
+
+test:
+	@echo $(CSRCS)
+
 
 #make xxx, xxx依赖xxx.imx
 %: $(BUILD_DIR)/%.imx
@@ -52,7 +58,7 @@ $(BUILD_DIR)/%.o : $(SRC_DIR)/%.s
 #命令前带“@”,表示不在终端上输出
 	@mkdir -p $(BUILD_DIR)
 	bear -- $(CC) -Wall -nostdlib -c -O2 $(INCLUDE) -o $@ $<
-$(BUILD_DIR)/%.o : $(SRC_DIR)/%.c $(INC_DIR)/*.h
+$(BUILD_DIR)/%.o : $(SRC_DIR)/%.c $(INC_DIR)/*.h #TODO
 	@mkdir -p $(BUILD_DIR)
 	bear -- $(CC) -Wall -nostdlib -c -O2 $(INCLUDE) -o $@ $<
 
