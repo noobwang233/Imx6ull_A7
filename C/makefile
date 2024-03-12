@@ -1,5 +1,5 @@
 #定义变量
-TARGET = timer_test
+TARGET = led_test
 CROSS_COMPILE ?= arm-linux-gnueabihf-
 
 CC := $(CROSS_COMPILE)gcc
@@ -36,7 +36,7 @@ $(BUILD_DIR)/$(TARGET).bin: $(OBJS) $(BUILD_DIR)/$(TARGET).o
 #反汇编elf
 	$(OBJDUMP) -D -m arm $(BUILD_DIR)/$(TARGET).elf > $(BUILD_DIR)/$(TARGET).dis
 #生成.imx文件
-	mkimx $(BUILD_DIR)/$(TARGET).bin
+	mkimage -n ~/Linux/Tools/imximage.cfg.cfgtmp -T imximage -e 0x87800000 -d $(BUILD_DIR)/$(TARGET).bin $(TARGET).imx 
 
 #*.o文件的生成规则
 $(BUILD_DIR)/%.o : $(SRC_DIR)/%.s

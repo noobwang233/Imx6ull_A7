@@ -1,5 +1,5 @@
 SECTIONS{
-    . = 0X87800000;
+    . = 0x87800000;
     .text :
     {
         build/start.o
