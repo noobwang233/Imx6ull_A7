@@ -51,17 +51,17 @@ int main(void)
 
 	tftlcd_dev.forecolor = LCD_RED;	  
 	lcd_show_string(10,10,400,32,32,(char*)"ZERO-IMX6UL ELCD TEST");  /* 显示字符串 */
-	lcd_draw_rectangle(10, 52, 780, 220);	/* 绘制矩形框  		*/
-	lcd_drawline(10, 52,780, 220);			/* 绘制线条		  	*/
-	lcd_drawline(10, 220,780, 52);			/* 绘制线条 		*/
-	lcd_draw_Circle(400, 171, 110);			/* 绘制圆形 		*/
+	lcd_draw_rectangle(10, 52, 790, 220);	/* 绘制矩形框  		*/
+	lcd_drawline(10, 52,790, 220);			/* 绘制线条		  	*/
+	lcd_drawline(10, 220,790, 52);			/* 绘制线条 		*/
+	lcd_draw_Circle(400, 136, 84);			/* 绘制圆形 		*/
 
 	while(1)				
 	{	
 		index++;
 		if(index == 10)
 			index = 0;
-		lcd_fill(0, 300, 1023, 599, backcolor[index]);
+		lcd_fill(0, 240, 800, 480, backcolor[index]);
 		lcd_show_string(600,10,240,32,32,(char*)"INDEX=");  /*显示字符串				  */
 		lcd_shownum(700,10, index, 2, 32); 					/* 显示数字，叠加显示	*/
 		
