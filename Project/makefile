@@ -12,6 +12,13 @@ LIBPATH			:= -lgcc -L /home/wta3wx/Linux/Tools/gcc-linaro-4.9.4-2017.01-x86_64_a
 #存放中间文件的路径
 BUILD_DIR = build
 
+#存放stdio文件的文件夹
+STD_DIR = stdio
+
+STD_SRCS = $(wildcard $(STD_DIR)/lib/*.c)
+STD_OBJS = $(patsubst %.c, $(STD_DIR)/%.o, $(notdir $(STD_SRCS))) #获取.c文件的目标文件.o文件
+STD_INC = stdio/include
+
 #存放BSP文件的文件夹
 BSP_DIR = bsp
 BSP_TARGET = clk\
@@ -41,8 +48,11 @@ PROG_DIR = prog
 #所有头文件
 INCS = $(shell find -name *.h) 	 #所有的头文件
 INC_PATH =$(sort $(dir $(INCS))) #所有的头文件目录
+INC_PATH += $(STD_INC)
 #指定头文件的路径
 INCLUDE = $(patsubst %, -I %, $(INC_PATH))
+
+OBJS = $(IMX6_OBJS) $(BSP_OBJS) $(STD_OBJS)
 
 #make xxx, xxx依赖xxx.imx
 $(TARGET): $(BUILD_DIR)/$(TARGET).imx
@@ -60,7 +70,7 @@ $(BUILD_DIR)/$(TARGET).bin: $(BUILD_DIR)/$(TARGET).elf
 	$(OBJDUMP) -D -m arm $(BUILD_DIR)/$(TARGET).elf > $(BUILD_DIR)/$(TARGET).dis
 
 #$(BUILD_DIR)/xxx.elf 依赖所有的.o文件
-$(BUILD_DIR)/$(TARGET).elf: $(BSP_OBJS) $(IMX6_OBJS) $(BUILD_DIR)/$(TARGET).o
+$(BUILD_DIR)/$(TARGET).elf: $(OBJS) $(BUILD_DIR)/$(TARGET).o
 #链接所有的目标文件
 	$(LD) -Timx6ull.lds -o $(BUILD_DIR)/$(TARGET).elf $^ $(LIBPATH)
 
@@ -76,6 +86,9 @@ $(BUILD_DIR)/%.o: $(BSP_DIR)/**/%.c  $(INCS)
 $(BUILD_DIR)/$(TARGET).o: $(PROG_DIR)/$(TARGET).c $(INCS)
 	@mkdir -p $(BUILD_DIR)
 	bear -- $(CC) -Wall -nostdlib -fno-builtin -c -O2 $(INCLUDE) -o $@ $<
+$(STD_DIR)/%.o: $(STD_DIR)/lib/%.c $(STD_INC)/*.h
+	bear -- $(CC) -Wall -Wa,-mimplicit-it=thumb -nostdlib -fno-builtin -c -O2 $(INCLUDE) -o $@ $<
+
 #伪目标
 .PHONY: distclean copy clean
 distclean:

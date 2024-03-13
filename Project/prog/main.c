@@ -20,6 +20,7 @@ Copyright © zuozhongkai Co., Ltd. 1998-2019. All rights reserved.
 #include "bsp_int.h"
 //#include "bsp_keyfilter.h"
 #include "bsp_uart.h"
+#include <stdio.h>
 /*
  * @description	: main函数
  * @param 		: 无
@@ -27,7 +28,7 @@ Copyright © zuozhongkai Co., Ltd. 1998-2019. All rights reserved.
  */
 int main(void)
 {
-	unsigned char a=0;
+	int a;
 	unsigned char state = OFF;
 
 	int_init(); 				/* 初始化中断(一定要最先调用！) */
@@ -39,16 +40,12 @@ int main(void)
 
 	while(1)				
 	{	
-		puts("请输入1个字符:");
-		a=getc();
-		putc(a);	//回显功能
-		puts("\r\n");
-
+		printf("请输入数字:");
+		scanf("%d", &a);
+		printf("\r\n");
 		//显示输入的字符
-		puts("您输入的字符为:");
-		putc(a);
-		puts("\r\n\r\n");
-		
+		printf("您输入的数字为：%d\r\n", a);
+		printf("\r\n\r\n");
 		state = !state;
 		led_switch(LED0,state);
 	}
