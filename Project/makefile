@@ -31,6 +31,7 @@ BSP_TARGET = clk\
 			led\
 			beep\
 			uart\
+			lcd\
 #源文件
 BSP_SRCS = $(foreach bsps, $(BSP_TARGET), $(wildcard $(BSP_DIR)/$(bsps)/*.c)) 
 BSP_OBJS = $(patsubst %.c, $(BUILD_DIR)/%.o, $(notdir $(BSP_SRCS))) #获取.c文件的目标文件.o文件
