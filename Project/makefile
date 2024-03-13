@@ -7,12 +7,23 @@ LD := $(CROSS_COMPILE)ld
 OBJCOPY := $(CROSS_COMPILE)objcopy
 OBJDUMP := $(CROSS_COMPILE)objdump
 
+
+LIBPATH			:= -lgcc -L /home/wta3wx/Linux/Tools/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/lib/gcc/arm-linux-gnueabihf/4.9.4
 #存放中间文件的路径
 BUILD_DIR = build
 
 #存放BSP文件的文件夹
 BSP_DIR = bsp
-BSP_TARGET = beep clk delay epittimer exit gpio int key keyfilter led
+BSP_TARGET = clk\
+			delay\
+			epittimer\
+			gpio\
+			int\
+			key\
+			keyfilter\
+			led\
+			beep\
+			uart\
 #源文件
 BSP_SRCS = $(foreach bsps, $(BSP_TARGET), $(wildcard $(BSP_DIR)/$(bsps)/*.c)) 
 BSP_OBJS = $(patsubst %.c, $(BUILD_DIR)/%.o, $(notdir $(BSP_SRCS))) #获取.c文件的目标文件.o文件
@@ -51,20 +62,20 @@ $(BUILD_DIR)/$(TARGET).bin: $(BUILD_DIR)/$(TARGET).elf
 #$(BUILD_DIR)/xxx.elf 依赖所有的.o文件
 $(BUILD_DIR)/$(TARGET).elf: $(BSP_OBJS) $(IMX6_OBJS) $(BUILD_DIR)/$(TARGET).o
 #链接所有的目标文件
-	$(LD) -Timx6ull.lds -o $(BUILD_DIR)/$(TARGET).elf $^
+	$(LD) -Timx6ull.lds -o $(BUILD_DIR)/$(TARGET).elf $^ $(LIBPATH)
 
 #*.o文件的生成规则
 $(BUILD_DIR)/%.o: $(IMX6_DIR)/%.s  $(INCS)
 	@mkdir -p $(BUILD_DIR)
-	bear -- $(CC) -Wall -nostdlib -c -O2 $(INCLUDE) -o $@ $<
+	bear -- $(CC) -Wall -nostdlib -fno-builtin -c -O2 $(INCLUDE) -o $@ $<
 
 $(BUILD_DIR)/%.o: $(BSP_DIR)/**/%.c  $(INCS)
 	@mkdir -p $(BUILD_DIR)
-	bear -- $(CC) -Wall -nostdlib -c -O2 $(INCLUDE) -o $@ $<
+	bear -- $(CC) -Wall -nostdlib -fno-builtin -c -O2 $(INCLUDE) -o $@ $<
 
 $(BUILD_DIR)/$(TARGET).o: $(PROG_DIR)/$(TARGET).c $(INCS)
 	@mkdir -p $(BUILD_DIR)
-	bear -- $(CC) -Wall -nostdlib -c -O2 $(INCLUDE) -o $@ $<
+	bear -- $(CC) -Wall -nostdlib -fno-builtin -c -O2 $(INCLUDE) -o $@ $<
 #伪目标
 .PHONY: distclean copy clean
 distclean:
