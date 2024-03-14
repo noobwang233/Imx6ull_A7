@@ -1,14 +1,17 @@
 #定义变量
 TARGET = main
-CROSS_COMPILE ?= arm-linux-gnueabihf-
+CROSS_COMPILE ?= arm-none-linux-gnueabihf-
+#CROSS_COMPILE ?= arm-linux-gnueabihf
 
-CC := $(CROSS_COMPILE)gcc
+#CC := $(CROSS_COMPILE)gcc
+CC := $(CROSS_COMPILE)gcc -fgnu89-inline
 LD := $(CROSS_COMPILE)ld
 OBJCOPY := $(CROSS_COMPILE)objcopy
 OBJDUMP := $(CROSS_COMPILE)objdump
 
+#LIBPATH := -lgcc -L /home/wta3wx/Linux/Tools/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/lib/gcc/arm-linux-gnueabihf/4.9.4
+LIBPATH := -lgcc -L /usr/local/arm/gcc-arm-9.2-2019.12-x86_64-arm-none-linux-gnueabihf/lib/gcc/arm-none-linux-gnueabihf/9.2.1/
 
-LIBPATH			:= -lgcc -L /home/wta3wx/Linux/Tools/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/lib/gcc/arm-linux-gnueabihf/4.9.4
 #存放中间文件的路径
 BUILD_DIR = build
 
@@ -64,7 +67,7 @@ $(TARGET): $(BUILD_DIR)/$(TARGET).imx
 #xxx.imx依赖 $(BUILD_DIR)/xxx.bin
 $(BUILD_DIR)/$(TARGET).imx: $(BUILD_DIR)/$(TARGET).bin
 #生成.imx文件
-	mkimage -n ~/Linux/Tools/imximage.cfg.cfgtmp -T imximage -e 0x87800000 -d $(BUILD_DIR)/$(TARGET).bin $(BUILD_DIR)/$(TARGET).imx
+	mkimage -n imximage.cfg.cfgtmp -T imximage -e 0x87800000 -d $(BUILD_DIR)/$(TARGET).bin $(BUILD_DIR)/$(TARGET).imx
 
 #$(BUILD_DIR)/xxx.bin 依赖 $(BUILD_DIR)/xxx.elf
 $(BUILD_DIR)/$(TARGET).bin: $(BUILD_DIR)/$(TARGET).elf
@@ -81,21 +84,21 @@ $(BUILD_DIR)/$(TARGET).elf: $(OBJS) $(BUILD_DIR)/$(TARGET).o
 #*.o文件的生成规则
 $(BUILD_DIR)/%.o: $(IMX6_DIR)/%.s  $(INCS)
 	@mkdir -p $(BUILD_DIR)
-	bear -- $(CC) -Wall -nostdlib -fno-builtin -c -O2 $(INCLUDE) -o $@ $<
+	$(CC) -Wall -nostdlib -fno-builtin -c -O2 $(INCLUDE) -o $@ $<
 
 $(BUILD_DIR)/%.o: $(BSP_DIR)/**/%.c  $(INCS)
 	@mkdir -p $(BUILD_DIR)
-	bear -- $(CC) -Wall -nostdlib -fno-builtin -c -O2 $(INCLUDE) -o $@ $<
+	$(CC) -Wall -nostdlib -fno-builtin -c -O2 $(INCLUDE) -o $@ $<
 
 $(BUILD_DIR)/$(TARGET).o: $(PROG_DIR)/$(TARGET).c $(INCS)
 	@mkdir -p $(BUILD_DIR)
-	bear -- $(CC) -Wall -nostdlib -fno-builtin -c -O2 $(INCLUDE) -o $@ $<
+	$(CC) -Wall -nostdlib -fno-builtin -c -O2 $(INCLUDE) -o $@ $<
 
 #库文件的生成规则
 $(STD_DIR)/%.o: $(STD_DIR)/lib/%.c $(STD_INC)/*.h
-	bear -- $(CC) -Wall -Wa,-mimplicit-it=thumb -nostdlib -fno-builtin -c -O2 $(INCLUDE) -o $@ $<
+	$(CC) -Wall -Wa,-mimplicit-it=thumb -nostdlib -fno-builtin -c -O2 $(INCLUDE) -o $@ $<
 $(STD_DIR)/%.o: $(STD_DIR)/lib/%.S $(STD_INC)/*.h
-	bear -- $(CC) -Wall -Wa,-mimplicit-it=thumb -nostdlib -fno-builtin -c -O2 $(INCLUDE) -o $@ $<
+	$(CC) -Wall -Wa,-mimplicit-it=thumb -nostdlib -fno-builtin -c -O2 $(INCLUDE) -o $@ $<
 
 #伪目标
 .PHONY: distclean copy clean
