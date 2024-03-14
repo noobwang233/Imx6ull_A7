@@ -15,8 +15,11 @@ BUILD_DIR = build
 #存放stdio文件的文件夹
 STD_DIR = stdio
 
-STD_SRCS = $(wildcard $(STD_DIR)/lib/*.c)
-STD_OBJS = $(patsubst %.c, $(STD_DIR)/%.o, $(notdir $(STD_SRCS))) #获取.c文件的目标文件.o文件
+STD_CSRCS = $(wildcard $(STD_DIR)/lib/*.c)
+STD_SSRCS = $(wildcard $(STD_DIR)/lib/*.S)
+STD_COBJS = $(patsubst %.c, $(STD_DIR)/%.o, $(notdir $(STD_CSRCS))) #获取.c文件的目标文件.o文件
+STD_SOBJS = $(patsubst %.S, $(STD_DIR)/%.o, $(notdir $(STD_SSRCS))) #获取.S文件的目标文件.o文件
+STD_OBJS = $(STD_COBJS) $(STD_SOBJS)
 STD_INC = stdio/include
 
 #存放BSP文件的文件夹
@@ -87,15 +90,19 @@ $(BUILD_DIR)/%.o: $(BSP_DIR)/**/%.c  $(INCS)
 $(BUILD_DIR)/$(TARGET).o: $(PROG_DIR)/$(TARGET).c $(INCS)
 	@mkdir -p $(BUILD_DIR)
 	bear -- $(CC) -Wall -nostdlib -fno-builtin -c -O2 $(INCLUDE) -o $@ $<
+
+#库文件的生成规则
 $(STD_DIR)/%.o: $(STD_DIR)/lib/%.c $(STD_INC)/*.h
+	bear -- $(CC) -Wall -Wa,-mimplicit-it=thumb -nostdlib -fno-builtin -c -O2 $(INCLUDE) -o $@ $<
+$(STD_DIR)/%.o: $(STD_DIR)/lib/%.S $(STD_INC)/*.h
 	bear -- $(CC) -Wall -Wa,-mimplicit-it=thumb -nostdlib -fno-builtin -c -O2 $(INCLUDE) -o $@ $<
 
 #伪目标
 .PHONY: distclean copy clean
 distclean:
-	rm -rf $(BUILD_DIR)
+	rm -rf $(BUILD_DIR) $(STD_DIR)/*.o
 clean:
-	rm -rf $(BUILD_DIR)/*.o $(BUILD_DIR)/*.dis $(BUILD_DIR)/*.elf
+	rm -rf $(BUILD_DIR)/*.o $(BUILD_DIR)/*.dis $(BUILD_DIR)/*.elf $(STD_DIR)/*.o
 copy:
 	rm -rf ~/OSD_share/*.imx
 	cp $(BUILD_DIR)/*.imx ~/OSD_share
