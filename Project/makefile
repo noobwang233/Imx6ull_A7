@@ -38,6 +38,8 @@ BSP_TARGET = clk\
 			beep\
 			uart\
 			lcd\
+			oled\
+			i2c
 #源文件
 BSP_SRCS = $(foreach bsps, $(BSP_TARGET), $(wildcard $(BSP_DIR)/$(bsps)/*.c)) 
 BSP_OBJS = $(patsubst %.c, $(BUILD_DIR)/%.o, $(notdir $(BSP_SRCS))) #获取.c文件的目标文件.o文件
@@ -106,5 +108,5 @@ distclean:
 clean:
 	rm -rf $(BUILD_DIR)/*.o $(BUILD_DIR)/*.dis $(BUILD_DIR)/*.elf $(STD_DIR)/*.o
 copy:
-	rm -rf ~/OSD_share/*.imx
-	cp $(BUILD_DIR)/*.imx ~/OSD_share
+	rm -rf ~/OSD_share/A7/*.imx
+	cp $(BUILD_DIR)/*.imx ~/OSD_share/A7/
