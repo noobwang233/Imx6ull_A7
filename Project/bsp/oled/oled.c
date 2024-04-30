@@ -28,6 +28,7 @@
 #include "imx6ul.h"
 #include "bsp_gpio.h"
 #include "bsp_uart.h"
+#include "bsp_delay.h"
 
 #define abs(x)  x < 0 ? (-x) : x
 
@@ -38,7 +39,7 @@
 #define OLED_PAGE 8            // OLED页数
 #define OLED_ROW 8 * OLED_PAGE // OLED行数
 #define OLED_COLUMN 128        // OLED列数
-
+#define OLED_COLUMN_OFFSET 2
 // 显存
 uint8_t OLED_GRAM[OLED_PAGE][OLED_COLUMN];
 
@@ -54,36 +55,72 @@ I2C_Type * oled_i2c = I2C1;
  * @note 此函数是移植本驱动时的重要函数 将本驱动库移植到其他平台时应根据实际情况修改此函数
  */
 void OLED_Send(uint8_t *data, uint8_t len) {
-//   HAL_I2C_Master_Transmit(&hi2c1, OLED_ADDRESS, data, len, HAL_MAX_DELAY);
     uint8_t ret;
+
     ret = i2c_master_start(oled_i2c, OLED_ADDRESS, kI2C_Write);
-    while(ret)
+    while(!(oled_i2c->I2SR & (1 << 1))){}; /* 等待应答 */
+    ret = i2c_check_and_clear_error(oled_i2c, oled_i2c->I2SR);
+    if(ret)
     {
-        printf("oled i2c start error, try again");
-        ret = i2c_master_start(oled_i2c, OLED_ADDRESS, kI2C_Write);
+        i2c_master_stop(oled_i2c); /* 发送出错，发送停止信号 */
     }
     i2c_master_write(oled_i2c, (const unsigned char *)data, (unsigned int) len);
-
-    ret = i2c_master_stop(oled_i2c);
-    while(ret)
-    {
-        printf("oled i2c stop error, try again");
-        ret = i2c_master_stop(oled_i2c);
-    }
 }
 
 /**
  * @brief 向OLED发送指令
  */
 void OLED_SendCmd(uint8_t cmd) {
-  static uint8_t sendBuffer[2] = {0};
-  sendBuffer[1] = cmd;
-  OLED_Send(sendBuffer, 2);
+    static uint8_t sendBuffer[2] = {0};
+    sendBuffer[1] = cmd;
+    OLED_Send(sendBuffer, 2);
 }
 
 // ========================== OLED驱动函数 ==========================
 
-const uint8_t sh1106_InitCmd[] = {};
+const uint8_t sh1106_InitCmd[] = {
+  
+  /*0xae,0X00,0X10,0x40,0X81,0XCF,0xff,0xa1,0xa4,
+  0xA6,0xc8,0xa8,0x3F,0xd5,0x80,0xd3,0x00,0XDA,0X12,
+  0x8d,0x14,0xdb,0x40,0X20,0X02,0xd9,0xf1,0xAF*/
+       0xAE,//关闭显示
+	
+       0xD5,//设置时钟分频因子,震荡频率
+       0x80,  //[3:0],分频因子;[7:4],震荡频率
+
+       0xA8,//设置驱动路数
+       0X3F,//默认(1/64)
+	
+       0xD3,//设置显示偏移
+       0X00,//默认为0
+	
+       0x40,//设置显示开始行 [5:0],行数.
+	
+       0x8D,//电荷泵设置
+       0x14,//bit2，开启/关闭
+       0x20,//设置内存地址模式
+       0x02,//[1:0],00，列地址模式;01，行地址模式;10,页地址模式;默认10;
+       0xA1,//段重定义设置,bit0:0,0->0;1,0->127;  A1
+	
+       0xC8,//设置COM扫描方向;bit3:0,普通模式;1,重定义模式 COM[N-1]->COM0;N:驱动路数 (C0 翻转显示) C8
+	   
+       0xDA,//设置COM硬件引脚配置
+       0x12,//[5:4]配置  
+	   
+       0x81,//对比度设置
+       0x66,//1~255;默认0X7F (亮度设置,越大越亮)
+	   
+       0xD9,//设置预充电周期
+       0xf1,//[3:0],PHASE 1;[7:4],PHASE 2;
+	   
+       0xDB,//设置VCOMH 电压倍率
+       0x30,//[6:4] 000,0.65*vcc;001,0.77*vcc;011,0.83*vcc;
+	   
+       0xA4,//全局显示开启;bit0:1,开启;0,关闭;(白屏/黑屏)
+	   
+       0xA6,//设置显示方式;bit0:1,反相显示;0,正常显示 
+
+};
 
 /**
  * @brief 初始化OLED
@@ -91,10 +128,25 @@ const uint8_t sh1106_InitCmd[] = {};
  */
 void OLED_Init() {
 
-    IOMUXC_SetPinMux(IOMUXC_UART4_TX_DATA_I2C1_SCL, 1);
-    IOMUXC_SetPinMux(IOMUXC_UART4_RX_DATA_I2C1_SDA, 1);
-    IOMUXC_SetPinConfig(IOMUXC_UART4_TX_DATA_I2C1_SCL, 0x70B0);
-    IOMUXC_SetPinConfig(IOMUXC_UART4_RX_DATA_I2C1_SDA, 0X70B0);
+	/* 1、IO初始化，配置I2C IO属性	
+     * I2C1_SCL -> UART4_TXD
+     * I2C1_SDA -> UART4_RXD
+     */
+	IOMUXC_SetPinMux(IOMUXC_UART4_TX_DATA_I2C1_SCL, 1);
+	IOMUXC_SetPinMux(IOMUXC_UART4_RX_DATA_I2C1_SDA, 1);
+
+	/* 
+	 *bit 16:0 HYS关闭
+	 *bit [15:14]: 1 默认47K上拉
+	 *bit [13]: 1 pull功能
+	 *bit [12]: 1 pull/keeper使能 
+	 *bit [11]: 0 关闭开路输出
+	 *bit [7:6]: 10 速度100Mhz
+	 *bit [5:3]: 110 驱动能力为R0/6
+	 *bit [0]: 1 高转换率
+	 */
+	IOMUXC_SetPinConfig(IOMUXC_UART4_TX_DATA_I2C1_SCL, 0x70B0);
+	IOMUXC_SetPinConfig(IOMUXC_UART4_RX_DATA_I2C1_SDA, 0X70B0);
 
     i2c_init(oled_i2c);
     delayms(20);
@@ -116,18 +168,18 @@ void OLED_Init() {
  * @brief 开启OLED显示
  */
 void OLED_DisPlay_On() {
-  OLED_SendCmd(0x8D); // 电荷泵使能
-  OLED_SendCmd(0x14); // 开启电荷泵
-  OLED_SendCmd(0xAF); // 点亮屏幕
+    OLED_SendCmd(0x8D); // 电荷泵使能
+    OLED_SendCmd(0x14); // 开启电荷泵
+    OLED_SendCmd(0xAF); // 点亮屏幕
 }
 
 /**
  * @brief 关闭OLED显示
  */
 void OLED_DisPlay_Off() {
-  OLED_SendCmd(0x8D); // 电荷泵使能
-  OLED_SendCmd(0x10); // 关闭电荷泵
-  OLED_SendCmd(0xAE); // 关闭屏幕
+    OLED_SendCmd(0x8D); // 电荷泵使能
+    OLED_SendCmd(0x10); // 关闭电荷泵
+    OLED_SendCmd(0xAE); // 关闭屏幕
 }
 
 /**
@@ -153,23 +205,30 @@ void OLED_NewFrame() {
   memset(OLED_GRAM, 0, sizeof(OLED_GRAM));
 }
 
+void OLED_PageSet(unsigned char page)
+{
+    OLED_SendCmd(0xb0+page);
+}
+
 void OLED_SetColumn(uint8_t column){
-    OLED_SendCmd((column & 0x0F));     // 设置列地址低4位
-    OLED_SendCmd((0x01 << 4 )|(column >> 4));     // 设置列地址高4位
+    column+=OLED_COLUMN_OFFSET;
+    OLED_SendCmd((0x10 )|(column >> 4));     // 设置列地址高4位
+    OLED_SendCmd((0x00 )|(column & 0x0F));     // 设置列地址低4位
+
 } 
 /**
  * @brief 将当前显存显示到屏幕上
  * @note 此函数是移植本驱动时的重要函数 将本驱动库移植到其他驱动芯片时应根据实际情况修改此函数
  */
 void OLED_ShowFrame() {
-  static uint8_t sendBuffer[OLED_COLUMN + 1];
-  sendBuffer[0] = 0x40;
-  for (uint8_t i = 0; i < OLED_PAGE; i++) {
-    OLED_SendCmd(0xB0 + i); // 设置页地址
-    OLED_SetColumn(0);
-    memcpy(sendBuffer + 1, OLED_GRAM[i], OLED_COLUMN);
-    OLED_Send(sendBuffer, OLED_COLUMN + 1);
-  }
+    static uint8_t sendBuffer[OLED_COLUMN + 1];
+    sendBuffer[0] = 0x40;
+    for (uint8_t i = 0; i < OLED_PAGE; i++) {
+        OLED_PageSet(i); // 设置页地址
+        OLED_SetColumn(0);
+        memcpy(sendBuffer + 1, OLED_GRAM[i], OLED_COLUMN);
+        OLED_Send(sendBuffer, OLED_COLUMN + 1);
+    }
 }
 
 /**
@@ -179,12 +238,12 @@ void OLED_ShowFrame() {
  * @param color 颜色
  */
 void OLED_SetPixel(uint8_t x, uint8_t y, OLED_ColorMode color) {
-  if (x >= OLED_COLUMN || y >= OLED_ROW) return;
-  if (!color) {
-    OLED_GRAM[y / 8][x] |= 1 << (y % 8);
-  } else {
-    OLED_GRAM[y / 8][x] &= ~(1 << (y % 8));
-  }
+    if (x >= OLED_COLUMN || y >= OLED_ROW) return;
+    if (!color) {
+        OLED_GRAM[y / 8][x] |= 1 << (y % 8);
+    } else {
+        OLED_GRAM[y / 8][x] &= ~(1 << (y % 8));
+    }
 }
 
 /**
@@ -200,18 +259,18 @@ void OLED_SetPixel(uint8_t x, uint8_t y, OLED_ColorMode color) {
  * @note 此函数与OLED_SetByte_Fine的区别在于此函数只能设置显存中的某一真实字节
  */
 void OLED_SetByte_Fine(uint8_t page, uint8_t column, uint8_t data, uint8_t start, uint8_t end, OLED_ColorMode color) {
-  static uint8_t temp;
-  if (page >= OLED_PAGE || column >= OLED_COLUMN) return;
-  if (color) data = ~data;
+    static uint8_t temp;
+    if (page >= OLED_PAGE || column >= OLED_COLUMN) return;
+    if (color) data = ~data;
 
-  temp = data | (0xff << (end + 1)) | (0xff >> (8 - start));
-  OLED_GRAM[page][column] &= temp;
-  temp = data & ~(0xff << (end + 1)) & ~(0xff >> (8 - start));
-  OLED_GRAM[page][column] |= temp;
-  // 使用OLED_SetPixel实现
-  // for (uint8_t i = start; i <= end; i++) {
-  //   OLED_SetPixel(column, page * 8 + i, !((data >> i) & 0x01));
-  // }
+    temp = data | (0xff << (end + 1)) | (0xff >> (8 - start));
+    OLED_GRAM[page][column] &= temp;
+    temp = data & ~(0xff << (end + 1)) & ~(0xff >> (8 - start));
+    OLED_GRAM[page][column] |= temp;
+    // 使用OLED_SetPixel实现
+    // for (uint8_t i = start; i <= end; i++) {
+    //   OLED_SetPixel(column, page * 8 + i, !((data >> i) & 0x01));
+    // }
 }
 
 /**

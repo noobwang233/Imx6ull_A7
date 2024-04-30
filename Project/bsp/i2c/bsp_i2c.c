@@ -31,7 +31,7 @@ void i2c_init(I2C_Type *base)
 	 * 在表29-3里面查找，没有660这个值，但是有640，因此就用640,
 	 * 即寄存器IFDR的IC位设置为0X15
 	 */
-	base->IFDR = 0X15 << 0;
+	base->IFDR = 0X0D << 0;
 
 	/*
      * 设置寄存器I2CR，开启I2C
@@ -80,7 +80,7 @@ unsigned char i2c_master_repeated_start(I2C_Type *base, unsigned char address,  
 unsigned char i2c_master_start(I2C_Type *base, unsigned char address,  enum i2c_direction direction)
 {
 	if(base->I2SR & (1 << 5))			/* I2C忙 */
-		return 1;
+		return I2C_STATUS_BUSY;
 
 	/*
      * 设置寄存器I2CR
@@ -95,7 +95,8 @@ unsigned char i2c_master_start(I2C_Type *base, unsigned char address,  enum i2c_
      *            参考资料:IMX6UL参考手册P1249
 	 */ 
 	base->I2DR = ((unsigned int)address << 1) | ((direction == kI2C_Read)? 1 : 0);
-	return 0;
+	//printf("start\r\n");
+	return I2C_STATUS_OK;
 }
 
 /*
@@ -113,10 +114,12 @@ unsigned char i2c_check_and_clear_error(I2C_Type *base, unsigned int status)
 
 		base->I2CR &= ~(1 << 7);	/* 先关闭I2C 				*/
 		base->I2CR |= (1 << 7);		/* 重新打开I2C 				*/
+		//printf("仲裁丢失\r\n");
 		return I2C_STATUS_ARBITRATIONLOST;
 	} 
 	else if(status & (1 << 0))     	/* 没有接收到从机的应答信号 */
 	{
+		//printf("NACK\r\n");
 		return I2C_STATUS_NAK;		/* 返回NAK(No acknowledge) */
 	}
 	return I2C_STATUS_OK;
@@ -142,8 +145,12 @@ unsigned char i2c_master_stop(I2C_Type *base)
 	{
 		timeout--;
 		if(timeout == 0)	/* 超时跳出 */
+		{
+			printf("time out\r\n");
 			return I2C_STATUS_TIMEOUT;
+		}
 	}
+	//printf("stop\r\n");
 	return I2C_STATUS_OK;
 }
 
@@ -165,6 +172,7 @@ void i2c_master_write(I2C_Type *base, const unsigned char *buf, unsigned int siz
 	
 	while(size--)
 	{
+		//printf("write date %d\r\n",*buf);
 		base->I2DR = *buf++; 	/* 将buf中的数据写入到I2DR寄存器 */
 		
 		while(!(base->I2SR & (1 << 1))); 	/* 等待传输完成 */	
@@ -172,7 +180,9 @@ void i2c_master_write(I2C_Type *base, const unsigned char *buf, unsigned int siz
 
 		/* 检查ACK */
 		if(i2c_check_and_clear_error(base, base->I2SR))
+		{
 			break;
+		}
 	}
 	
 	base->I2SR &= ~(1 << 1);

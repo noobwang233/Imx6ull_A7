@@ -67,7 +67,7 @@ int main(void)
 		lcd_shownum(700,10, index, 2, 32); 					/* 显示数字，叠加显示	*/
 
 		OLED_NewFrame();
-		OLED_PrintASCIIString(10, 10, (char *)&index, &afont16x8, OLED_COLOR_NORMAL);
+		OLED_PrintASCIIString(10, 10, "Hello world!", &afont16x8, OLED_COLOR_NORMAL);
 		OLED_ShowFrame();
 		printf("INDEX= %d\r\n", index);
 		state = !state;
