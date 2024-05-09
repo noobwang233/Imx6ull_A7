@@ -62,6 +62,7 @@ void OLED_Send(uint8_t *data, uint8_t len) {
     ret = i2c_check_and_clear_error(oled_i2c, oled_i2c->I2SR);
     if(ret)
     {
+        printf("start error\r\n");
         i2c_master_stop(oled_i2c); /* 发送出错，发送停止信号 */
     }
     i2c_master_write(oled_i2c, (const unsigned char *)data, (unsigned int) len);

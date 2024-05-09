@@ -68,6 +68,7 @@ int main(void)
 
 		OLED_NewFrame();
 		OLED_PrintASCIIString(10, 10, "Hello world!", &afont16x8, OLED_COLOR_NORMAL);
+		OLED_PrintASCIIChar(10, 30, (char)('0' + index), &afont16x8, OLED_COLOR_NORMAL);
 		OLED_ShowFrame();
 		printf("INDEX= %d\r\n", index);
 		state = !state;
