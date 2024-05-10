@@ -1,7 +1,7 @@
 #定义变量
 TARGET = main
-CROSS_COMPILE ?= arm-none-linux-gnueabihf-
-#CROSS_COMPILE ?= arm-linux-gnueabihf
+#CROSS_COMPILE ?= arm-none-linux-gnueabihf-
+CROSS_COMPILE ?= arm-linux-gnueabihf-
 
 #CC := $(CROSS_COMPILE)gcc
 CC := $(CROSS_COMPILE)gcc -fgnu89-inline
@@ -9,8 +9,8 @@ LD := $(CROSS_COMPILE)ld
 OBJCOPY := $(CROSS_COMPILE)objcopy
 OBJDUMP := $(CROSS_COMPILE)objdump
 
-#LIBPATH := -lgcc -L /home/wta3wx/Linux/Tools/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/lib/gcc/arm-linux-gnueabihf/4.9.4
-LIBPATH := -lgcc -L /usr/local/arm/gcc-arm-9.2-2019.12-x86_64-arm-none-linux-gnueabihf/lib/gcc/arm-none-linux-gnueabihf/9.2.1/
+LIBPATH := -lgcc -L /home/wta3wx/Linux/Tools/gcc-linaro-7.5.0-2019.12-x86_64_arm-linux-gnueabihf/lib/gcc/arm-linux-gnueabihf/7.5.0
+# LIBPATH := -lgcc -L /usr/local/arm/gcc-arm-9.2-2019.12-x86_64-arm-none-linux-gnueabihf/lib/gcc/arm-none-linux-gnueabihf/9.2.1/
 
 #存放中间文件的路径
 BUILD_DIR = build
@@ -38,6 +38,8 @@ BSP_TARGET = clk\
 			beep\
 			uart\
 			lcd\
+			oled\
+			i2c
 #源文件
 BSP_SRCS = $(foreach bsps, $(BSP_TARGET), $(wildcard $(BSP_DIR)/$(bsps)/*.c)) 
 BSP_OBJS = $(patsubst %.c, $(BUILD_DIR)/%.o, $(notdir $(BSP_SRCS))) #获取.c文件的目标文件.o文件
@@ -61,8 +63,7 @@ INCLUDE = $(patsubst %, -I %, $(INC_PATH))
 
 OBJS = $(IMX6_OBJS) $(BSP_OBJS) $(STD_OBJS)
 
-#make xxx, xxx依赖xxx.imx
-$(TARGET): $(BUILD_DIR)/$(TARGET).imx
+all: $(BUILD_DIR)/$(TARGET).imx
 
 #xxx.imx依赖 $(BUILD_DIR)/xxx.bin
 $(BUILD_DIR)/$(TARGET).imx: $(BUILD_DIR)/$(TARGET).bin
@@ -101,11 +102,11 @@ $(STD_DIR)/%.o: $(STD_DIR)/lib/%.S $(STD_INC)/*.h
 	$(CC) -Wall -Wa,-mimplicit-it=thumb -nostdlib -fno-builtin -c -O2 $(INCLUDE) -o $@ $<
 
 #伪目标
-.PHONY: distclean copy clean
+.PHONY: all distclean copy clean
 distclean:
 	rm -rf $(BUILD_DIR) $(STD_DIR)/*.o
 clean:
 	rm -rf $(BUILD_DIR)/*.o $(BUILD_DIR)/*.dis $(BUILD_DIR)/*.elf $(STD_DIR)/*.o
 copy:
-	rm -rf ~/OSD_share/*.imx
-	cp $(BUILD_DIR)/*.imx ~/OSD_share
+	rm -rf ~/OSD_share/A7/*.imx
+	cp $(BUILD_DIR)/*.imx ~/OSD_share/A7/
