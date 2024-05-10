@@ -44,7 +44,7 @@ int main(void)
 	imx6u_clkinit();			/* 初始化系统时钟 			*/
 	delay_init();				/* 初始化延时 			*/
 	clk_enable();				/* 使能所有的时钟 			*/
-	//led_init();					/* 初始化led 			*/
+	led_init();					/* 初始化led 			*/
 	//beep_init();				/* 初始化beep	 		*/
 	uart_init();				/* 初始化串口，波特率115200 */
 	lcd_init();					/* 初始化LCD 			*/

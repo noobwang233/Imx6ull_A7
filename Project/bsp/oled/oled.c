@@ -39,48 +39,15 @@
 #define OLED_PAGE 8            // OLED页数
 #define OLED_ROW 8 * OLED_PAGE // OLED行数
 #define OLED_COLUMN 128        // OLED列数
+
 #define OLED_COLUMN_OFFSET 2
+
 // 显存
-uint8_t OLED_GRAM[OLED_PAGE][OLED_COLUMN];
+volatile uint8_t OLED_GRAM[OLED_PAGE][OLED_COLUMN];
 
 I2C_Type * oled_i2c = I2C1;
 
-// ========================== 底层通信函数 ==========================
-
-/**
- * @brief 向OLED发送数据的函数
- * @param data 要发送的数据
- * @param len 要发送的数据长度
- * @return None
- * @note 此函数是移植本驱动时的重要函数 将本驱动库移植到其他平台时应根据实际情况修改此函数
- */
-void OLED_Send(uint8_t *data, uint8_t len) {
-    uint8_t ret;
-
-    ret = i2c_master_start(oled_i2c, OLED_ADDRESS, kI2C_Write);
-    while(!(oled_i2c->I2SR & (1 << 1))){}; /* 等待应答 */
-    ret = i2c_check_and_clear_error(oled_i2c, oled_i2c->I2SR);
-    if(ret)
-    {
-        printf("start error\r\n");
-        i2c_master_stop(oled_i2c); /* 发送出错，发送停止信号 */
-    }
-    i2c_master_write(oled_i2c, (const unsigned char *)data, (unsigned int) len);
-}
-
-/**
- * @brief 向OLED发送指令
- */
-void OLED_SendCmd(uint8_t cmd) {
-    static uint8_t sendBuffer[2] = {0};
-    sendBuffer[1] = cmd;
-    OLED_Send(sendBuffer, 2);
-}
-
-// ========================== OLED驱动函数 ==========================
-
 const uint8_t sh1106_InitCmd[] = {
-  
   /*0xae,0X00,0X10,0x40,0X81,0XCF,0xff,0xa1,0xa4,
   0xA6,0xc8,0xa8,0x3F,0xd5,0x80,0xd3,0x00,0XDA,0X12,
   0x8d,0x14,0xdb,0x40,0X20,0X02,0xd9,0xf1,0xAF*/
@@ -120,34 +87,70 @@ const uint8_t sh1106_InitCmd[] = {
        0xA4,//全局显示开启;bit0:1,开启;0,关闭;(白屏/黑屏)
 	   
        0xA6,//设置显示方式;bit0:1,反相显示;0,正常显示 
-
+       
+    //    0xAF,//开启显示     
 };
 
+static void OLED_ColumnSet(unsigned char column);
+static void OLED_PageSet(unsigned char page);
+// ========================== 底层通信函数 ==========================
+
+/**
+ * @brief 向OLED发送数据的函数
+ * @param data 要发送的数据
+ * @param len 要发送的数据长度
+ * @return None
+ * @note 此函数是移植本驱动时的重要函数 将本驱动库移植到其他平台时应根据实际情况修改此函数
+ */
+void OLED_Send(uint8_t *data, uint8_t len) {
+    uint8_t ret;
+
+    ret = i2c_master_start(oled_i2c, OLED_ADDRESS, kI2C_Write);
+    while(!(oled_i2c->I2SR & (1 << 1))){}; /* 等待应答 */
+    ret = i2c_check_and_clear_error(oled_i2c, oled_i2c->I2SR);
+    if(ret)
+    {
+        printf("start error\r\n");
+        i2c_master_stop(oled_i2c); /* 发送出错，发送停止信号 */
+    }
+    i2c_master_write(oled_i2c, (const unsigned char *)data, (unsigned int) len);
+}
+
+/**
+ * @brief 向OLED发送指令
+ */
+void OLED_SendCmd(uint8_t cmd) {
+    static uint8_t sendBuffer[2] = {0};
+    sendBuffer[1] = cmd;
+    OLED_Send(sendBuffer, 2);
+}
+
+// ========================== OLED驱动函数 ==========================
 /**
  * @brief 初始化OLED
  * @note 此函数是移植本驱动时的重要函数 将本驱动库移植到其他驱动芯片时应根据实际情况修改此函数
  */
 void OLED_Init() {
 
-	/* 1、IO初始化，配置I2C IO属性	
-     * I2C1_SCL -> UART4_TXD
-     * I2C1_SDA -> UART4_RXD
-     */
-	IOMUXC_SetPinMux(IOMUXC_UART4_TX_DATA_I2C1_SCL, 1);
-	IOMUXC_SetPinMux(IOMUXC_UART4_RX_DATA_I2C1_SDA, 1);
+    /* 1、IO初始化，配置I2C IO属性	
+      * I2C1_SCL -> UART4_TXD
+      * I2C1_SDA -> UART4_RXD
+      */
+    IOMUXC_SetPinMux(IOMUXC_UART4_TX_DATA_I2C1_SCL, 1);
+    IOMUXC_SetPinMux(IOMUXC_UART4_RX_DATA_I2C1_SDA, 1);
 
-	/* 
-	 *bit 16:0 HYS关闭
-	 *bit [15:14]: 1 默认47K上拉
-	 *bit [13]: 1 pull功能
-	 *bit [12]: 1 pull/keeper使能 
-	 *bit [11]: 0 关闭开路输出
-	 *bit [7:6]: 10 速度100Mhz
-	 *bit [5:3]: 110 驱动能力为R0/6
-	 *bit [0]: 1 高转换率
-	 */
-	IOMUXC_SetPinConfig(IOMUXC_UART4_TX_DATA_I2C1_SCL, 0x70B0);
-	IOMUXC_SetPinConfig(IOMUXC_UART4_RX_DATA_I2C1_SDA, 0X70B0);
+    /* 
+    *bit 16:0 HYS关闭
+    *bit [15:14]: 1 默认47K上拉
+    *bit [13]: 1 pull功能
+    *bit [12]: 1 pull/keeper使能 
+    *bit [11]: 0 关闭开路输出
+    *bit [7:6]: 10 速度100Mhz
+    *bit [5:3]: 110 驱动能力为R0/6
+    *bit [0]: 1 高转换率
+    */
+    IOMUXC_SetPinConfig(IOMUXC_UART4_TX_DATA_I2C1_SCL, 0x70B0);
+    IOMUXC_SetPinConfig(IOMUXC_UART4_RX_DATA_I2C1_SDA, 0X70B0);
 
     i2c_init(oled_i2c);
     delayms(20);
@@ -203,20 +206,20 @@ void OLED_SetColorMode(OLED_ColorMode mode) {
  * @brief 清空显存 绘制新的一帧
  */
 void OLED_NewFrame() {
-  memset(OLED_GRAM, 0, sizeof(OLED_GRAM));
+  memset((void *)OLED_GRAM, 0, sizeof(OLED_GRAM));
 }
 
-void OLED_PageSet(unsigned char page)
+static void OLED_PageSet(unsigned char page)
 {
     OLED_SendCmd(0xb0+page);
 }
-
-void OLED_SetColumn(uint8_t column){
+static void OLED_ColumnSet(unsigned char column)
+{
     column+=OLED_COLUMN_OFFSET;
     OLED_SendCmd((0x10 )|(column >> 4));     // 设置列地址高4位
     OLED_SendCmd((0x00 )|(column & 0x0F));     // 设置列地址低4位
+}
 
-} 
 /**
  * @brief 将当前显存显示到屏幕上
  * @note 此函数是移植本驱动时的重要函数 将本驱动库移植到其他驱动芯片时应根据实际情况修改此函数
@@ -226,8 +229,8 @@ void OLED_ShowFrame() {
     sendBuffer[0] = 0x40;
     for (uint8_t i = 0; i < OLED_PAGE; i++) {
         OLED_PageSet(i); // 设置页地址
-        OLED_SetColumn(0);
-        memcpy(sendBuffer + 1, OLED_GRAM[i], OLED_COLUMN);
+        OLED_ColumnSet(0);
+        memcpy(sendBuffer + 1, (const void*)OLED_GRAM[i], OLED_COLUMN);
         OLED_Send(sendBuffer, OLED_COLUMN + 1);
     }
 }
@@ -300,18 +303,18 @@ void OLED_SetByte(uint8_t page, uint8_t column, uint8_t data, OLED_ColorMode col
  * @note 此函数与OLED_SetByte_Fine的区别在于此函数的横坐标和纵坐标是以像素为单位的, 可能出现跨两个真实字节的情况(跨页)
  */
 void OLED_SetBits_Fine(uint8_t x, uint8_t y, uint8_t data, uint8_t len, OLED_ColorMode color) {
-  uint8_t page = y / 8;
-  uint8_t bit = y % 8;
-  if (bit + len > 8) {
-    OLED_SetByte_Fine(page, x, data << bit, bit, 7, color);
-    OLED_SetByte_Fine(page + 1, x, data >> (8 - bit), 0, len + bit - 1 - 8, color);
-  } else {
-    OLED_SetByte_Fine(page, x, data << bit, bit, bit + len - 1, color);
-  }
-  // 使用OLED_SetPixel实现
-  // for (uint8_t i = 0; i < len; i++) {
-  //   OLED_SetPixel(x, y + i, !((data >> i) & 0x01));
-  // }
+    uint8_t page = y / 8;
+    uint8_t bit = y % 8;
+    if (bit + len > 8) {
+        OLED_SetByte_Fine(page, x, data << bit, bit, 7, color);
+        OLED_SetByte_Fine(page + 1, x, data >> (8 - bit), 0, len + bit - 1 - 8, color);
+    } else {
+        OLED_SetByte_Fine(page, x, data << bit, bit, bit + len - 1, color);
+    }
+    // 使用OLED_SetPixel实现
+    // for (uint8_t i = 0; i < len; i++) {
+    //   OLED_SetPixel(x, y + i, !((data >> i) & 0x01));
+    // }
 }
 
 /**
