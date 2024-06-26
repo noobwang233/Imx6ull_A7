@@ -41,7 +41,7 @@ void spi_init(ECSPI_Type *base)
      * bit16：	0 通道0 数据线空闲时高电平
      * bit20:	0 通道0 时钟线空闲时低电平
 	 */
-	base->CONFIGREG = 0; 		/* 设置通道寄存器 */
+	base->CONFIGREG |=  (1 << 4) | (1 << 16); 		/* 设置通道寄存器 */
 	
 	/*  
      * ECSPI通道0设置，设置采样周期

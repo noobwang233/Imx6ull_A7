@@ -19,8 +19,8 @@ Copyright © zuozhongkai Co., Ltd. 1998-2019. All rights reserved.
 #include "bsp_uart.h"
 #include "stdio.h"
 #include "bsp_lcd.h"
-#include "bsp_lcdapi.h"
-#include "oled.h"
+#include "bsp_lcd.h"
+#include "QDTFT_demo.h"
 
 /* 背景颜色索引 */
 unsigned int backcolor[10] = {
@@ -37,9 +37,6 @@ unsigned int backcolor[10] = {
  */
 int main(void)
 {
-	unsigned char index = 0;
-	unsigned char state = OFF;
-
 	int_init(); 				/* 初始化中断(一定要最先调用！) */
 	imx6u_clkinit();			/* 初始化系统时钟 			*/
 	delay_init();				/* 初始化延时 			*/
@@ -47,32 +44,10 @@ int main(void)
 	led_init();					/* 初始化led 			*/
 	//beep_init();				/* 初始化beep	 		*/
 	uart_init();				/* 初始化串口，波特率115200 */
-	lcd_init();					/* 初始化LCD 			*/
-	OLED_Init();
-
-	tftlcd_dev.forecolor = LCD_RED;	  
-	lcd_show_string(10,10,400,32,32,(char*)"ZERO-IMX6UL ELCD TEST");  /* 显示字符串 */
-	lcd_draw_rectangle(10, 52, 790, 220);	/* 绘制矩形框  		*/
-	lcd_drawline(10, 52,790, 220);			/* 绘制线条		  	*/
-	lcd_drawline(10, 220,790, 52);			/* 绘制线条 		*/
-	lcd_draw_Circle(400, 136, 84);			/* 绘制圆形 		*/
 
 	while(1)				
 	{	
-		index++;
-		if(index == 10)
-			index = 0;
-		lcd_fill(0, 240, 800, 480, backcolor[index]);
-		lcd_show_string(600,10,240,32,32,(char*)"INDEX=");  /*显示字符串				  */
-		lcd_shownum(700,10, index, 2, 32); 					/* 显示数字，叠加显示	*/
-
-		OLED_NewFrame();
-		OLED_PrintASCIIString(10, 10, "Hello world!", &afont16x8, OLED_COLOR_NORMAL);
-		OLED_PrintASCIIChar(10, 30, (char)('0' + index), &afont16x8, OLED_COLOR_NORMAL);
-		OLED_ShowFrame();
-		printf("INDEX= %d\r\n", index);
-		state = !state;
-		led_switch(LED0,state);
+		QDTFT_Test_Demo();
 		delayms(1000);	/* 延时一秒	*/
 	}
 	return 0;
