@@ -16,19 +16,19 @@
 
 
 /**************接线******************/
-/* UART2_RXD SPI3_SCLk  ------ SCL          */
-/* UART2_CTS SPI3_MOSI  ------ SDA          */
-/* UART2_TXD SPI3_SS0   ------ CS           */
-/* GPIO_4               ------ BLK          */
-/* GPIO_2               ------ DC           */
-/* GPIO_1               ------ RST          */
+/* UART2_RXD    SPI3_SCLk   PIN18 ------ SCL          */
+/* UART2_CTS    SPI3_MOSI   PIN20 ------ SDA          */
+/* UART2_TXD    SPI3_SS0    PIN17 ------ CS           */
+/* UART3_RXD    GPIO1_IO25  PIN35 ------ BLK          */
+/* UART3_TXD    GPIO1_IO24  PIN33  ------ DC          */
+/* GPIO_1                   PIN7  ------ RST          */
 
 
 #define LCD_GPIO_BASE    GPIO1
 
 #define	LCD_RST          1
-#define	LCD_RS           2
-#define	LCD_LED          4
+#define	LCD_RS           24
+#define	LCD_LED          25
 
 //#define LCD_CS_SET(x) LCD_CTRL->ODR=(LCD_CTRL->ODR&~LCD_CS)|(x ? LCD_CS:0)
 

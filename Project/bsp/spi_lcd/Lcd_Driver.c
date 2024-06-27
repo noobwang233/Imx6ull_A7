@@ -42,11 +42,32 @@ uint8_t lcd_datas[] = {
 
 void LCD_GPIO_Init(void)
 {
-	gpio_pin_config_t cfg = {
-		.direction = kGPIO_DigitalOutput,
-		.outputLogic = 1,
-		.interruptMode = kGPIO_NoIntmode,
-	};
+	gpio_pin_config_t cs_config, cfg;
+	/* 1、IO初始化复用功能 */
+	IOMUXC_SetPinMux(IOMUXC_UART3_RX_DATA_GPIO1_IO25,0);
+	IOMUXC_SetPinMux(IOMUXC_UART3_TX_DATA_GPIO1_IO24,0);
+	IOMUXC_SetPinMux(IOMUXC_GPIO1_IO01_GPIO1_IO01,0);
+	IOMUXC_SetPinMux(IOMUXC_UART2_RX_DATA_ECSPI3_SCLK, 0);
+	IOMUXC_SetPinMux(IOMUXC_UART2_CTS_B_ECSPI3_MOSI, 0);
+	IOMUXC_SetPinMux(IOMUXC_UART2_RTS_B_ECSPI3_MISO, 0);
+
+	IOMUXC_SetPinConfig(IOMUXC_UART2_RX_DATA_ECSPI3_SCLK, 0x10B1);
+	IOMUXC_SetPinConfig(IOMUXC_UART2_CTS_B_ECSPI3_MOSI, 0x10B1);
+	IOMUXC_SetPinConfig(IOMUXC_UART2_RTS_B_ECSPI3_MISO, 0x10B1);
+	
+	/* 初始化片选引脚 */
+	IOMUXC_SetPinMux(IOMUXC_UART2_TX_DATA_GPIO1_IO20, 0);
+	IOMUXC_SetPinConfig(IOMUXC_UART2_TX_DATA_GPIO1_IO20, 0X10B0);
+
+
+	cs_config.direction = kGPIO_DigitalOutput;
+	cs_config.outputLogic = 0;
+	gpio_init(GPIO1, 20, &cs_config);
+
+	
+	cfg.direction = kGPIO_DigitalOutput;
+	cfg.outputLogic = 1;
+	cfg.interruptMode = kGPIO_NoIntmode;
 
 	gpio_init(LCD_GPIO_BASE, LCD_RST, &cfg);
 	gpio_init(LCD_GPIO_BASE, LCD_RS, &cfg);

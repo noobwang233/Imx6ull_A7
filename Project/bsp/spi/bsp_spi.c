@@ -41,7 +41,7 @@ void spi_init(ECSPI_Type *base)
      * bit16：	0 通道0 数据线空闲时高电平
      * bit20:	0 通道0 时钟线空闲时低电平
 	 */
-	base->CONFIGREG |=  (1 << 4) | (1 << 16); 		/* 设置通道寄存器 */
+	base->CONFIGREG |= (1 < 4) | (1 << 16) | (1 << 20); 		/* 设置通道寄存器 */
 	
 	/*  
      * ECSPI通道0设置，设置采样周期
@@ -51,7 +51,7 @@ void spi_init(ECSPI_Type *base)
      * bit15	 :  0  采样时钟源为SPI CLK
      * bit[21:16]:  0  片选延时，可设置为0~63
 	 */
-	base->PERIODREG = 0X0000;		/* 设置采样周期寄存器 */
+	base->PERIODREG = 0X2000;		/* 设置采样周期寄存器 */
 
 	/*
      * ECSPI的SPI时钟配置，SPI的时钟源来源于pll3_sw_clk/8=480/8=60MHz
