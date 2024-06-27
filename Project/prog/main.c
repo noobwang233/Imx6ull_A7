@@ -37,6 +37,9 @@ unsigned int backcolor[10] = {
  */
 int main(void)
 {
+	unsigned char index = 0;
+	unsigned char state = OFF;
+
 	int_init(); 				/* 初始化中断(一定要最先调用！) */
 	imx6u_clkinit();			/* 初始化系统时钟 			*/
 	delay_init();				/* 初始化延时 			*/
@@ -44,10 +47,25 @@ int main(void)
 	led_init();					/* 初始化led 			*/
 	//beep_init();				/* 初始化beep	 		*/
 	uart_init();				/* 初始化串口，波特率115200 */
+	lcd_init();					/* 初始化LCD 			*/
 
+	tftlcd_dev.forecolor = LCD_RED;	  
+	lcd_show_string(10,10,400,32,32,(char*)"ZERO-IMX6UL ELCD TEST");  /* 显示字符串 */
+	lcd_draw_rectangle(10, 52, 790, 220);	/* 绘制矩形框  		*/
+	lcd_drawline(10, 52,790, 220);			/* 绘制线条		  	*/
+	lcd_drawline(10, 220,790, 52);			/* 绘制线条 		*/
+	lcd_draw_Circle(400, 136, 84);			/* 绘制圆形 		*/
 	while(1)				
 	{	
-		QDTFT_Test_Demo();
+		index++;
+		if(index == 10)
+			index = 0;
+		lcd_fill(0, 240, 800, 480, backcolor[index]);
+		lcd_show_string(600,10,240,32,32,(char*)"INDEX=");  /*显示字符串				  */
+		lcd_shownum(700,10, index, 2, 32); 					/* 显示数字，叠加显示	*/
+		
+		state = !state;
+		led_switch(LED0,state);
 		delayms(1000);	/* 延时一秒	*/
 	}
 	return 0;
